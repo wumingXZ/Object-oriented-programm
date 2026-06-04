@@ -3,10 +3,6 @@
 
 #include <vector>
 
-class Student_info;
-
-double grade(double midterm, double final, double homework);
-double grade(double midterm, double final, const std::vector<double>& hw);
-double grade(const Student_info& s);
+double grade(double, double, const std::vector<double>&);
 
 #endif

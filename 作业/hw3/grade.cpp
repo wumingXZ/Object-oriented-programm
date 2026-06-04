@@ -30,26 +30,22 @@ double grade(const Student_info & s){
 //grade_aux
 double grade_aux(const Student_info & s)
 {
-	try{
-		return grade(s);
-	}catch(domain_error){
-		return grade(s.midterm, s.final, 0);
-	}
+	return grade(s);
 }
 
 //average_grade
 double average_grade(const Student_info & s)
 {
-	return grade(s.midterm, s.final, average(s.homework));
+	return grade(s.midterm, s.final, MySpace::average(s.homework));
 }
 
 //optimistic_median
 double optimistic_median(const Student_info & s)
 {
 	vector<double> nonzero;
-	remove_copy(s.homework.begin(), s.homework.end(), back_inserter(nonzero), 0.0);
-	if(nonzero.empty())
-		return grade(s.midterm, s.final, 0);
-	return grade(s.midterm, s.final, median(nonzero));
+	MySpace::remove_copy(s.homework.begin(), s.homework.end(), back_inserter(nonzero), 0.0);
+	if (nonzero.empty())
+		throw domain_error("student has done no homework");
+	return grade(s.midterm, s.final, MySpace::median(nonzero));
 }
 

@@ -2,16 +2,15 @@
 #define GUARD_median_h
 
 #include <vector>
-#include <stdexcept>
 
-//�����Ƕ���Զ���ķ��ͺ�����
-//�����Զ���������ռ�MySpace�С�
-//��Ҫʹ�õ���Щ������ʱ��
-//�������ļ���ʼʹ�á�using MySpace::find;�������
-//����ֱ���ں�����ǰ�ӡ�MySpace::����
+//以下是自定义的模板函数
+//均在自定义名字空间MySpace中。
+//需要使用到这些函数时，
+//可在文件开头使用"using MySpace::find;"等，
+//或直接在函数名前加"MySpace::"。
 namespace MySpace{
 
-//����ʵ�ַ��ͺ���swap����������������ֵ 
+//自定义模板函数swap：交换两个变量的值 
 template <class X>
 void swap(X & x, X & y){
 	X tmp=x;
@@ -19,7 +18,7 @@ void swap(X & x, X & y){
 	y=tmp;
 }
 
-//����ʵ�ַ��ͺ���sort����ð�ݷ����� 
+//自定义模板函数sort：用冒泡法排序 
 template<class Ran>
 void sort(Ran begin, Ran end)
 {
@@ -30,7 +29,7 @@ void sort(Ran begin, Ran end)
 				swap(*j,*(j+1));
 }
 
-//����ʵ�ַ��ͺ���median������ֵ 
+//自定义模板函数median：求中值 
 template<class T>
 T median(std::vector<T> vec)
 {
@@ -39,60 +38,68 @@ T median(std::vector<T> vec)
 	vec_sz size = vec.size();
 	if(size == 0)
 		throw std::domain_error("median of an empty vector");
-	sort(vec.begin(),vec.end());
+	MySpace::sort(vec.begin(),vec.end());
 	vec_sz mid = size/2;
 	return size % 2 == 0 ? (vec[mid]+vec[mid-1])/2 : vec[mid];
 }
 
-//����ʵ�ַ��ͺ���average�����ֵ
+//自定义模板函数average：求均值
 template<class T>
 T average(std::vector<T> vec)
 {
 //	std::cout << "average...\n";
-	if(vec.empty())
+	//TODO
+	auto size = vec.size();
+	if(size == 0) {
 		throw std::domain_error("average of an empty vector");
-	T sum = T();
-	for(typename std::vector<T>::size_type i = 0; i != vec.size(); ++i)
-		sum += vec[i];
-	return sum / vec.size();
-
+	}	
+	T sum = 0;
+	for(int i = 0; i < size; ++i) {
+		sum += vec[i];	
+	}
+	
+	return sum / size;
 }
 
-//����ʵ�ַ��ͺ���find��ʵ�ֲ��ҹ��� 
+//自定义模板函数find：实现查找功能 
 template <class In, class X> 
 In find(In begin, In end, const X&x){
 //	std::cout << "find...\n";
-	while(begin != end && *begin != x)
-		++begin;
-	return begin;
-
+	//TODO
+	for(; begin != end; begin++) {
+		if (*begin == x) {
+			return begin;
+		}
+	}
+	
+	return end;
 }
 
-//����ʵ�ַ��ͺ���remove_copy��
-//��������x��ƥ���ԭ�ظ��Ƶ����������dest��ʾ��Ŀ���ַ�С� 
+//自定义模板函数remove_copy：
+//将不等于x的元素从原处复制到以dest表示的目标处。 
 template <class In, class Out, class X> 
 Out remove_copy(In begin, In end, Out dest,const X&x){
 //	std::cout << "remove_copy...\n";
-	while(begin != end){
-		if(*begin != x)
-			*dest++ = *begin;
-		++begin;
+	for(; begin != end; begin++) {
+		if (*begin != x) {
+			*dest = *begin;
+			dest++;
+		}
 	}
 	return dest;
-
-
 }
 
-//����ʵ�ַ��ͺ���transform��
-//�����������begin��end��ʾ�����е�Ԫ���ϵ��ú���f��
-//������浽���������d��ʾ��Ŀ���ַ�С� 
+//自定义模板函数transform：
+//对以begin和end表示的序列中的元素调用函数f，
+//并存储到以d表示的目标处。 
 template <class In, class Out, class F> 
-Out transform(In begin, In end, Out dest, F func){
+Out transform(In begin,In end, Out dest, F func){
 //	std::cout << "transform...\n";
-	while(begin != end){
-		*dest++ = func(*begin);
-		++begin;
+	//TODO
+	for(; begin != end; begin++, dest++) {
+		*dest = func(*begin);
 	}
+
 	return dest;
 }
 

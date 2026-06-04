@@ -13,10 +13,10 @@ struct Student_info{
 	bool operator<(const Student_info &n)const{
 		return name<n.name;
 	}
+
 };
 
 std::istream & read(std::istream & is, Student_info &s);
 std::istream & read_hw(std::istream & in, std::vector<double> & hw);
-bool did_all_hw(const Student_info & s);
 
 #endif

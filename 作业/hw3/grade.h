@@ -9,6 +9,5 @@ double grade(double midterm, double final, const std::vector<double> & hw);
 double grade_aux(const Student_info & s);
 double average_grade(const Student_info & s);
 double optimistic_median(const Student_info & s);
-bool fgrade(const Student_info &s);
 
 #endif
