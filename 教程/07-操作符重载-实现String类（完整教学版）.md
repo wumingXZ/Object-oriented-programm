@@ -2,7 +2,6 @@
 
 > 基于课件 `06-操作符重载.md`，参考 C++ Primer 第五版（英文版）第 14 章、第 7 章补充优化。
 >
-> 本文中所有代码块均支持 **Markdown Preview Enhanced** 的 `{cmd=true}` 功能，可以直接运行查看结果。
 
 ## 目录
 
@@ -42,21 +41,11 @@ cout << s1 + s2;  // 清晰，自然
 
 ### 运行示例：直观感受操作符重载的好处
 
-```cpp {cmd=true}
-#include <iostream>
-#include <string>
-using namespace std;
-
-int main() {
-    string s1 = "Hello, ";
-    string s2 = "world!";
-    // 使用 + 运算符连接字符串，使用 << 运算符输出
-    cout << "s1 + s2 = " << s1 + s2 << endl;
-    // 使用 [] 运算符访问单个字符
-    cout << "s1[0] = " << s1[0] << endl;
-    cout << "s2.size() = " << s2.size() << endl;
-    return 0;
-}
+```cpp
+string s1 = "Hello, ";
+string s2 = "world!";
+// 使用 + 运算符连接字符串，使用 << 运算符输出
+// 使用 [] 运算符访问单个字符
 ```
 
 > **来自 C++ Primer 第 14 章的核心原则**：操作符重载最有价值的时候，是当运算符的内置含义与你对类型的操作之间存在**自然的逻辑映射**时。
@@ -70,10 +59,7 @@ int main() {
 
 重载操作符就是一个**名字特殊的函数**：关键字 `operator` 后跟运算符符号。
 
-```cpp {cmd=true}
-#include <iostream>
-using namespace std;
-
+```cpp
 // 自定义类型：用 operator+ 作为非成员函数
 struct Point {
     int x, y;
@@ -95,43 +81,29 @@ struct Point2 {
     }
 };
 
-int main() {
-    Point p1(1, 2), p2(3, 4);
+// 使用示例
+Point p1(1, 2), p2(3, 4);
 
-    // 两个调用完全等价：
-    Point sum1 = p1 + p2;                       // 表达式形式
-    Point sum2 = operator+(p1, p2);             // 直接函数调用形式
-    cout << "p1 + p2 = (" << sum1.x << ", " << sum1.y << ")" << endl;
-    cout << "operator+(p1,p2) = (" << sum2.x << ", " << sum2.y << ")" << endl;
+// 两个调用完全等价：
+Point sum1 = p1 + p2;                       // 表达式形式
+Point sum2 = operator+(p1, p2);             // 直接函数调用形式
 
-    // 成员函数版本的调用等价：
-    Point2 m1{5, 6}, m2{7, 8};
-    m1 += m2;                                    // 表达式形式
-    cout << "m1 += m2: (" << m1.x << ", " << m1.y << ")" << endl;
-    // m1.operator+=(m2);                        // 等价的成员函数调用
-    return 0;
-}
+// 成员函数版本的调用等价：
+Point2 m1{5, 6}, m2{7, 8};
+m1 += m2;                                    // 表达式形式
+// m1.operator+=(m2);                        // 等价的成员函数调用
 ```
 
 ### 2.2 成员函数还是非成员函数？— 关键判断
 
 **对称性操作符**（算术、相等性、关系、位运算）**通常应该定义为非成员函数**。
 
-```cpp {cmd=true}
-#include <iostream>
-#include <string>
-using namespace std;
-
-int main() {
-    string s = "world";
-    string t = s + "!";     // OK: operator+(string, const char*)
-    string u = "hi" + s;    // OK: operator+(const char*, string)
-    // 如果 operator+ 是成员函数，"hi"+s 就会失败
-    // 因为 "hi" 是 const char*，内置类型没有成员函数
-    cout << "t = " << t << endl;
-    cout << "u = " << u << endl;
-    return 0;
-}
+```cpp
+string s = "world";
+string t = s + "!";     // OK: operator+(string, const char*)
+string u = "hi" + s;    // OK: operator+(const char*, string)
+// 如果 operator+ 是成员函数，"hi"+s 就会失败
+// 因为 "hi" 是 const char*，内置类型没有成员函数
 ```
 
 ### 2.3 运算符分类速查表
@@ -150,13 +122,7 @@ int main() {
 
 使用 `Vec<char>` 作为底层存储来实现自己的 `Str` 类。为了简洁演示，这里用一个简化的版本：
 
-```cpp {cmd=true}
-#include <iostream>
-#include <cstring>
-#include <algorithm>
-#include <vector>
-using namespace std;
-
+```cpp
 class Str {
 public:
     typedef vector<char>::size_type size_type;
@@ -197,18 +163,6 @@ ostream& operator<<(ostream& os, const Str& s) {
         os << s[i];
     return os;
 }
-
-int main() {
-    Str s("Hello");
-    Str t = " world!";
-    cout << "s = \"" << s << "\"" << endl;
-    cout << "s[1] = '" << s[1] << "'" << endl;
-
-    // 隐式转换：const char* → Str
-    s = "Goodbye";
-    cout << "After assignment: s = \"" << s << "\"" << endl;
-    return 0;
-}
 ```
 
 `★ Insight ─────────────────────────────────────`
@@ -220,14 +174,7 @@ int main() {
 <a id="四输入运算符-operator-与友元"></a>
 ## 四、输入运算符 `operator>>` 与友元
 
-```cpp {cmd=true}
-#include <iostream>
-#include <cctype>
-#include <vector>
-#include <algorithm>
-#include <cstring>
-using namespace std;
-
+```cpp
 class Str {
     friend istream& operator>>(istream& is, Str& s);
     friend ostream& operator<<(ostream& os, const Str& s);
@@ -267,15 +214,6 @@ istream& operator>>(istream& is, Str& s) {
     }
     return is;
 }
-
-int main() {
-    Str s;
-    cout << "请输入一个单词: ";
-    cin >> s;
-    cout << "你输入的是: \"" << s << "\"" << endl;
-    cout << "长度: " << s.size() << endl;
-    return 0;
-}
 ```
 
 ---
@@ -283,13 +221,7 @@ int main() {
 <a id="五加法运算符--和-"></a>
 ## 五、加法运算符 `+` 和 `+=`
 
-```cpp {cmd=true}
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <cstring>
-using namespace std;
-
+```cpp
 class Str {
     friend ostream& operator<<(ostream& os, const Str& s);
 public:
@@ -324,20 +256,15 @@ ostream& operator<<(ostream& os, const Str& s) {
     return os;
 }
 
-int main() {
-    Str s1 = "Hello, ";
-    Str s2 = "world!";
-    Str s3 = s1 + s2;          // operator+(const Str&, const Str&)
-    cout << "s1 + s2 = \"" << s3 << "\"" << endl;
+// 使用示例
+Str s1 = "Hello, ";
+Str s2 = "world!";
+Str s3 = s1 + s2;          // operator+(const Str&, const Str&)
 
-    s1 += Str(" C++");         // operator+=(const Str&)
-    cout << "s1 += \" C++\": \"" << s1 << "\"" << endl;
+s1 += Str(" C++");         // operator+=(const Str&)
 
-    // 混合类型：const char* + Str
-    Str greeting = ">> " + s3;
-    cout << "\">> \" + s3 = \"" << greeting << "\"" << endl;
-    return 0;
-}
+// 混合类型：const char* + Str
+Str greeting = ">> " + s3;
 ```
 
 **关键设计模式**：用 `+=`（成员，高效）实现 `+`（非成员，通用）。
@@ -347,10 +274,7 @@ int main() {
 <a id="六自增自减运算符-i-和-i"></a>
 ## 六、自增/自减运算符 `++i` 和 `i++`
 
-```cpp {cmd=true}
-#include <iostream>
-using namespace std;
-
+```cpp
 class Counter {
     int n;
 public:
@@ -369,25 +293,14 @@ public:
     int value() const { return n; }
 };
 
-// 输出运算符
-ostream& operator<<(ostream& os, const Counter& c) {
-    return os << c.value();
-}
+// 使用示例
+Counter a(0);
+++a;    // 前缀 ++
+a++;    // 后缀 ++
 
-int main() {
-    Counter a(0);
-    cout << "初始值: " << a << endl;
-
-    cout << "++a: " << ++a << " (a变为: " << a << ")" << endl;
-    cout << "a++: " << a++ << " (a变为: " << a << ")" << endl;
-
-    // 前缀返回引用，可以链式调用
-    Counter b(5);
-    ++++++b;  // 连续三次前缀++
-    cout << "三次 ++++b 后: " << b << endl;
-
-    return 0;
-}
+// 前缀返回引用，可以链式调用
+Counter b(5);
+++++++b;  // 连续三次前缀++
 ```
 
 | | 前缀 `++a` | 后缀 `a++` |
@@ -400,11 +313,7 @@ int main() {
 
 ## 七、解引用 `*` 和箭头 `->` 运算符
 
-```cpp {cmd=true}
-#include <iostream>
-#include <string>
-using namespace std;
-
+```cpp
 // 简化的链表节点
 template <typename T>
 struct ListNode {
@@ -430,35 +339,14 @@ public:
     }
 };
 
-int main() {
-    // 创建链表: 10 → 20 → 30
-    ListNode<int>* head = new ListNode<int>(10,
-                            new ListNode<int>(20,
-                                new ListNode<int>(30)));
+// 使用示例
+ListNode<int>* head = new ListNode<int>(10,
+                        new ListNode<int>(20,
+                            new ListNode<int>(30)));
 
-    Iterator<int> it(head);
-    cout << "*it = " << *it << endl;
-
-    // 用 -> 访问 string 的 size()
-    ListNode<string> strNode(string("hello"));
-    Iterator<string> sit(&strNode);
-    cout << "sit->size() = " << sit->size() << endl;
-
-    // 遍历
-    cout << "遍历链表: ";
-    for (Iterator<int> i(head); i != Iterator<int>(); ++i) {
-        cout << *i << " ";
-    }
-    cout << endl;
-
-    // 清理
-    while (head) {
-        ListNode<int>* t = head;
-        head = head->next;
-        delete t;
-    }
-    return 0;
-}
+Iterator<int> it(head);
+// *it == 10
+// it-> 访问 ListNode<int>::data
 ```
 
 > `operator->` 必须返回一个普通指针，或一个自己也定义了 `operator->` 的类对象。
@@ -467,11 +355,7 @@ int main() {
 
 ## 八、类型转换操作符
 
-```cpp {cmd=true}
-#include <iostream>
-#include <cmath>
-using namespace std;
-
+```cpp
 class Complex {
     double re, im;
 public:
@@ -492,23 +376,18 @@ public:
     }
 };
 
-int main() {
-    Complex c(3, 4);
-    cout << "c = " << c << endl;
+// 使用示例
+Complex c(3, 4);
 
-    // 隐式转换：Complex → double
-    double magnitude = c;  // operator double()
-    cout << "magnitude(c) = " << magnitude << " (即 |3+4i| = 5)" << endl;
+// 隐式转换：Complex → double
+double magnitude = c;  // operator double()
 
-    // explicit operator bool：只能在条件中使用
-    Complex zero(0, 0);
-    if (c)     cout << "c 非零" << endl;
-    if (!zero) cout << "zero 为零" << endl;
+// explicit operator bool：只能在条件中使用
+Complex zero(0, 0);
+if (c)     { /* c 非零 */ }
+if (!zero) { /* zero 为零 */ }
 
-    // 下面这行会编译失败（explicit 阻止了隐式转换）：
-    // bool b = c;  // 错误！operator bool 是 explicit
-    return 0;
-}
+// bool b = c;  // 错误！operator bool 是 explicit
 ```
 
 > **C++ Primer 建议**：实践中类很少提供类型转换操作符，唯一的常见例外是转到 `bool`，且应声明为 `explicit`。
@@ -517,11 +396,7 @@ int main() {
 
 ## 九、类的静态成员
 
-```cpp {cmd=true}
-#include <iostream>
-#include <string>
-using namespace std;
-
+```cpp
 class Student {
     static int count;  // 静态数据成员：统计对象数量
     string name;
@@ -541,21 +416,14 @@ public:
 // 必须在类外部定义并初始化静态成员
 int Student::count = 0;
 
-int main() {
-    cout << "初始学生数: " << Student::total() << endl;
-
-    Student s1("Alice");
-    Student s2("Bob");
-    {
-        Student s3("Charlie");
-        cout << "创建3个学生后: " << Student::total() << endl;
-    }  // s3 离开作用域，被销毁
-    cout << "s3销毁后: " << Student::total() << endl;
-
-    cout << "学生列表: " << s1.getName() << ", "
-         << s2.getName() << endl;
-    return 0;
-}
+// 使用示例
+Student s1("Alice");
+Student s2("Bob");
+{
+    Student s3("Charlie");
+    // 创建3个学生后，Student::total() == 3
+}  // s3 离开作用域，被销毁
+// s3销毁后，Student::total() == 2
 ```
 
 > 静态成员**属于类**而非对象；通过 `ClassName::member` 访问（推荐），也可通过对象访问。
@@ -564,10 +432,7 @@ int main() {
 
 ## 十、常量数据成员和引用数据成员
 
-```cpp {cmd=true}
-#include <iostream>
-using namespace std;
-
+```cpp
 class Config {
     const int maxUsers;   // 常量成员：初始化后不可修改
     int& externalRef;      // 引用成员：绑定后不可更改
@@ -575,43 +440,24 @@ public:
     Config(int max, int& ext)
         : maxUsers(max), externalRef(ext) {}  // ✅ 必须用初始化列表
 
-    void display() const {
-        cout << "maxUsers = " << maxUsers
-             << ", externalRef = " << externalRef << endl;
-    }
-
     void updateExternal(int newVal) {
         externalRef = newVal;  // OK：修改引用的对象，不是重新绑定
     }
-
     // void setMax(int m) { maxUsers = m; }  // ❌ 错误！const 成员不可修改
 };
 
-int main() {
-    int shared = 100;
-    Config cfg(1000, shared);
-    cfg.display();
-
-    cfg.updateExternal(200);
-    cout << "After updateExternal(200):" << endl;
-    cfg.display();
-    cout << "shared现在 = " << shared << endl;  // 200 —— 引用生效
-    return 0;
-}
+// 使用示例
+int shared = 100;
+Config cfg(1000, shared);
+cfg.updateExternal(200);
+// shared 变为 200 —— 引用生效
 ```
 
 ---
 
 ## 十一、完整示例：一个可运行的 Str 类
 
-```cpp {cmd=true}
-#include <iostream>
-#include <cstring>
-#include <cctype>
-#include <vector>
-#include <algorithm>
-using namespace std;
-
+```cpp
 class Str {
     friend istream& operator>>(istream&, Str&);
     friend ostream& operator<<(ostream&, const Str&);
@@ -664,19 +510,10 @@ Str operator+(const Str& a, const Str& b) {
     return r;
 }
 
-int main() {
-    Str hello = "Hello, ";
-    Str world = "World!";
-    Str greeting = hello + world;
-    cout << greeting << endl;
-
-    Str name;
-    cout << "输入你的名字: ";
-    cin >> name;
-    cout << "你好, " << name << "!" << endl;
-
-    return 0;
-}
+// 使用示例
+Str hello = "Hello, ";
+Str world = "World!";
+Str greeting = hello + world;
 ```
 
 ---

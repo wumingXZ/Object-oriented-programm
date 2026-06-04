@@ -11,7 +11,7 @@ This repository contains materials for **面向对象程序设计 (Object-Orient
 - `教程/` — Primary learning materials: 8 weekly chapters (01–08) + 10 supplementary chapters (补充09–18) covering C++ Primer topics
 - `课件（md格式）/` — Original lecture courseware (Chinese Markdown), numbered 00–07
 - `作业/` — Programming assignments (see below)
-- `.vscode/settings.json` — Enables `markdown-preview-enhanced.enableScriptExecution` so code blocks in `.md` files can run inline via Shift+Enter
+- `.vscode/settings.json` — VS Code workspace settings
 
 ## Homework assignments — architecture evolution
 
@@ -65,6 +65,6 @@ Some directories have `in.txt`/`out.txt` as input/output pairs instead of the `h
 
 ## Notes
 
-- The `.gitignore` excludes compiled binaries (`*.out`, `.exe`, `*.o`, `a.out`) and `.DS_Store`, but keeps `.vscode/settings.json` (needed for MPE) and `requirements.txt`
+- The `.gitignore` excludes compiled binaries (`*.out`, `.exe`, `*.o`, `a.out`) and `.DS_Store`
 - Lab `actual.txt` files (e.g., `test3_1_actual.txt`) are student-generated output used for self-verification
 - The repo tracks only the C++ source files — original files named in `.gitignore` patterns like `*.txt` (except `requirements.txt`) are gitignored so compiled output doesn't accidentally commit, but test input/output `.txt` files are tracked explicitly

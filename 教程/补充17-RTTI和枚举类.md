@@ -6,7 +6,6 @@
 >
 > **关联已有知识：** 第 08 周（多态和虚函数——RTTI 的前提）、第 03 周（map 的 pair → tuple 泛化）、第 04 周（泛型算法结合 bitset）、补充 12（关联容器与 enum class 的配合）。
 >
-> 本文中所有代码块均支持 **Markdown Preview Enhanced** 的 `{cmd=true}` 功能，可以直接运行查看结果。
 
 ## 目录
 
@@ -31,12 +30,7 @@
 
 RTTI 的两个核心运算符：`dynamic_cast`（安全的向下转型）和 `typeid`（获取类型信息）。
 
-```cpp {cmd=true}
-#include <iostream>
-#include <string>
-#include <vector>
-using namespace std;
-
+```cpp
 class Animal {
 public:
     virtual ~Animal() = default;
@@ -46,43 +40,34 @@ public:
 class Dog : public Animal {
 public:
     string sound() const override { return "汪汪!"; }
-    void fetch() { cout << "  🐕 接飞盘!" << endl; }
+    void fetch() { }
 };
 
 class Cat : public Animal {
 public:
     string sound() const override { return "喵喵!"; }
-    void climb() { cout << "  🐈 爬树!" << endl; }
+    void climb() { }
 };
 
-int main() {
-    vector<Animal*> zoo{new Dog, new Cat, new Dog};
+vector<Animal*> zoo{new Dog, new Cat, new Dog};
 
-    for (auto *animal : zoo) {
-        cout << "叫声: " << animal->sound() << endl;
-
-        // dynamic_cast：尝试将基类指针转为派生类指针
-        // 如果失败（类型不匹配），返回 nullptr
-        if (auto *dog = dynamic_cast<Dog*>(animal)) {
-            dog->fetch();  // 安全地调用 Dog 特有的方法
-        } else if (auto *cat = dynamic_cast<Cat*>(animal)) {
-            cat->climb();  // 安全地调用 Cat 特有的方法
-        }
+for (auto *animal : zoo) {
+    // dynamic_cast：尝试将基类指针转为派生类指针
+    // 如果失败（类型不匹配），返回 nullptr
+    if (auto *dog = dynamic_cast<Dog*>(animal)) {
+        dog->fetch();  // 安全地调用 Dog 特有的方法
+    } else if (auto *cat = dynamic_cast<Cat*>(animal)) {
+        cat->climb();  // 安全地调用 Cat 特有的方法
     }
-
-    // 清理
-    for (auto *p : zoo) delete p;
-    return 0;
 }
+
+// 清理
+for (auto *p : zoo) delete p;
 ```
 
 ### 1.2 `dynamic_cast` 用于引用
 
-```cpp {cmd=true}
-#include <iostream>
-#include <stdexcept>
-using namespace std;
-
+```cpp
 class Base {
 public:
     virtual ~Base() = default;
@@ -90,22 +75,18 @@ public:
 
 class Derived : public Base {
 public:
-    void derived_only() { cout << "Derived 特有的方法" << endl; }
+    void derived_only() { }
 };
 
-int main() {
-    Derived d;
-    Base &ref = d;
+Derived d;
+Base &ref = d;
 
-    // 对引用做 dynamic_cast：失败时抛 std::bad_cast
-    try {
-        auto &dr = dynamic_cast<Derived&>(ref);
-        dr.derived_only();
-    } catch (const bad_cast &e) {
-        cerr << "dynamic_cast 失败: " << e.what() << endl;
-    }
-
-    return 0;
+// 对引用做 dynamic_cast：失败时抛 std::bad_cast
+try {
+    auto &dr = dynamic_cast<Derived&>(ref);
+    dr.derived_only();
+} catch (const bad_cast &e) {
+    // dynamic_cast 失败
 }
 ```
 
@@ -116,11 +97,7 @@ int main() {
 
 ### 1.3 `typeid` — 获取运行时类型信息
 
-```cpp {cmd=true}
-#include <iostream>
-#include <typeinfo>
-using namespace std;
-
+```cpp
 class Base {
 public:
     virtual ~Base() = default;
@@ -128,25 +105,21 @@ public:
 
 class Derived : public Base {};
 
-int main() {
-    Derived d;
-    Base *pb = &d;
+Derived d;
+Base *pb = &d;
 
-    // typeid 用于多态类型时，在运行时确定动态类型
-    cout << "静态类型: " << typeid(pb).name() << endl;       // Base*
-    cout << "动态类型: " << typeid(*pb).name() << endl;      // Derived
+// typeid 用于多态类型时，在运行时确定动态类型
+// typeid(pb)      // 静态类型 Base*
+// typeid(*pb)     // 动态类型 Derived
 
-    // 比较类型
-    if (typeid(*pb) == typeid(Derived)) {
-        cout << "*pb 是 Derived 类型" << endl;
-    }
-
-    // 非多态类型：编译期决定
-    int i = 42;
-    cout << "int 的类型: " << typeid(i).name() << endl;
-
-    return 0;
+// 比较类型
+if (typeid(*pb) == typeid(Derived)) {
+    // *pb 是 Derived 类型
 }
+
+// 非多态类型：编译期决定
+int i = 42;
+// typeid(i).name()
 ```
 
 > **RTTI 使用原则：**
@@ -158,10 +131,7 @@ int main() {
 
 ## 二、强类型枚举 `enum class`（C++11）
 
-```cpp {cmd=true}
-#include <iostream>
-using namespace std;
-
+```cpp
 // ❌ C 风格枚举（C++98）：作用域污染
 // enum Color { Red, Green, Blue };
 // enum TrafficLight { Red, Yellow, Green };  // ❌ Red 和 Green 冲突！
@@ -184,23 +154,15 @@ Permission operator|(Permission a, Permission b) {
     );
 }
 
-int main() {
-    // 使用强类型枚举（需要作用域限定符）
-    Color c = Color::Red;
-    TrafficLight tl = TrafficLight::Green;
+// 使用强类型枚举（需要作用域限定符）
+Color c = Color::Red;
+TrafficLight tl = TrafficLight::Green;
 
-    // int n = c;           // ❌ 不能隐式转换
-    int n = static_cast<int>(c);  // ✅ 必须显式转换
+// int n = c;           // ❌ 不能隐式转换
+int n = static_cast<int>(c);  // ✅ 必须显式转换
 
-    cout << "Color: " << static_cast<int>(c) << endl;
-    cout << "可以指定底层类型来节省空间" << endl;
-
-    // 位掩码用法
-    Permission p = Permission::Read | Permission::Write;
-    cout << "权限掩码: " << static_cast<int>(p) << endl;
-
-    return 0;
-}
+// 位掩码用法
+Permission p = Permission::Read | Permission::Write;
 ```
 
 | | C 风格 `enum` | C++11 `enum class` |
@@ -214,39 +176,28 @@ int main() {
 
 ## 三、`tuple` — 泛化的 `pair`
 
-```cpp {cmd=true}
-#include <iostream>
-#include <tuple>
-#include <string>
-using namespace std;
+```cpp
+// tuple：可以存放任意数量、任意类型的元素
+tuple<string, int, double> student("Alice", 2024001, 89.5);
 
-int main() {
-    // tuple：可以存放任意数量、任意类型的元素
-    tuple<string, int, double> student("Alice", 2024001, 89.5);
+// 访问元素
+get<0>(student);  // 姓名
+get<1>(student);  // 学号
+get<2>(student);  // 成绩
 
-    // 访问元素
-    cout << "姓名: " << get<0>(student) << endl;
-    cout << "学号: " << get<1>(student) << endl;
-    cout << "成绩: " << get<2>(student) << endl;
+// 使用 tie 解包
+string name;
+int id;
+double score;
+tie(name, id, score) = student;
 
-    // 使用 tie 解包
-    string name;
-    int id;
-    double score;
-    tie(name, id, score) = student;
-    cout << "解包: " << name << ", " << id << ", " << score << endl;
+// 使用 ignore 忽略不需要的字段
+tie(name, ignore, score) = student;
 
-    // 使用 ignore 忽略不需要的字段
-    tie(name, ignore, score) = student;
-    cout << "只取姓名和成绩: " << name << ", " << score << endl;
-
-    // 元组比较（按元素顺序逐个比较）
-    auto t1 = make_tuple(1, string("a"), 3.0);
-    auto t2 = make_tuple(1, string("b"), 2.0);
-    cout << "t1 < t2: " << boolalpha << (t1 < t2) << endl;
-
-    return 0;
-}
+// 元组比较（按元素顺序逐个比较）
+auto t1 = make_tuple(1, string("a"), 3.0);
+auto t2 = make_tuple(1, string("b"), 2.0);
+t1 < t2;
 ```
 
 ### `tuple` vs `struct`
@@ -264,55 +215,37 @@ int main() {
 
 ## 四、`bitset` — 位集合
 
-```cpp {cmd=true}
-#include <iostream>
-#include <bitset>
-using namespace std;
+```cpp
+// bitset：固定大小的位集合
+bitset<8> bs1;                       // 00000000
+bitset<8> bs2(42);                   // 00101010 (42 的二进制)
+bitset<8> bs3(string("1100"));       // 00001100
 
-int main() {
-    // bitset：固定大小的位集合
-    bitset<8> bs1;                       // 00000000
-    bitset<8> bs2(42);                   // 00101010 (42 的二进制)
-    bitset<8> bs3(string("1100"));       // 00001100
+// 位操作
+bs1.set(3);                // 设置第3位
+bs1.flip(0);               // 翻转第0位
 
-    cout << "bs1 = " << bs1 << endl;
-    cout << "bs2 = " << bs2 << endl;
-    cout << "bs3 = " << bs3 << endl;
+// 查询
+bs2.count();               // 置1的位数
+bs2.test(1);               // 第1位是否为1
+bs2.any();                 // 是否有置1的位
 
-    // 位操作
-    bs1.set(3);                // 设置第3位 → 00001000
-    bs1.flip(0);               // 翻转第0位 → 00001001
-    cout << "bs1 操作后 = " << bs1 << endl;
+// 转换
+bs2.to_ulong();
+bs2.to_string();
 
-    // 查询
-    cout << "bs2 中置1的位数: " << bs2.count() << endl;
-    cout << "bs2 第1位是否为1: " << bs2.test(1) << endl;
-    cout << "bs2 是否有置1的位: " << (bs2.any() ? "是" : "否") << endl;
-
-    // 转换
-    cout << "bs2 转 unsigned long: " << bs2.to_ulong() << endl;
-    cout << "bs2 转 string: " << bs2.to_string() << endl;
-
-    // 实际应用：权限管理
-    enum { READ = 0, WRITE = 1, EXECUTE = 2 };
-    bitset<3> permissions;
-    permissions.set(READ);
-    permissions.set(WRITE);
-    cout << "权限: " << permissions << " (读+写)" << endl;
-
-    return 0;
-}
+// 实际应用：权限管理
+enum { READ = 0, WRITE = 1, EXECUTE = 2 };
+bitset<3> permissions;
+permissions.set(READ);
+permissions.set(WRITE);
 ```
 
 ---
 
 ## 五、`union` — 节省空间的联合体
 
-```cpp {cmd=true}
-#include <iostream>
-#include <string>
-using namespace std;
-
+```cpp
 // C++11: union 可以包含有构造/析构函数的类型
 union Token {
     int ival;
@@ -325,53 +258,29 @@ union Token {
     ~Token() {}                   // 不自动调用 string 的析构
 };
 
-int main() {
-    Token t;
-    t.ival = 42;
-    cout << "t.ival = " << t.ival << endl;
-
-    t.dval = 3.14;
-    cout << "t.dval = " << t.dval << endl;
-    // ⚠️ t.ival 现在无效——union 所有成员共享同一块内存
-
-    cout << "sizeof(Token) = " << sizeof(Token) << " bytes"
-         << " (int=" << sizeof(int)
-         << ", double=" << sizeof(double) << ")" << endl;
-
-    return 0;
-}
+Token t;
+t.ival = 42;
+// ⚠️ t.ival 现在无效——union 所有成员共享同一块内存
+t.dval = 3.14;
 ```
 
 ---
 
 ## 六、`mem_fn` — 将成员函数转为可调用对象
 
-```cpp {cmd=true}
-#include <iostream>
-#include <vector>
-#include <string>
-#include <functional>
-#include <algorithm>
-using namespace std;
+```cpp
+vector<string> words{"hello", "", "world", "", "C++"};
 
-int main() {
-    vector<string> words{"hello", "", "world", "", "C++"};
+// 问题：如何统计空字符串的数量？
+// 错误：不能直接传成员函数指针
+// auto cnt1 = count_if(words.begin(), words.end(), &string::empty);
 
-    // 问题：如何统计空字符串的数量？
-    // 错误：不能直接传成员函数指针
-    // auto cnt1 = count_if(words.begin(), words.end(), &string::empty);
+// ✅ C++11: 用 mem_fn 包装成员函数
+auto cnt = count_if(words.begin(), words.end(), mem_fn(&string::empty));
 
-    // ✅ C++11: 用 mem_fn 包装成员函数
-    auto cnt = count_if(words.begin(), words.end(), mem_fn(&string::empty));
-    cout << "空字符串数量: " << cnt << endl;
-
-    // ✅ C++11: 也可以用 lambda（更现代、更推荐）
-    auto cnt2 = count_if(words.begin(), words.end(),
-                         [](const string &s) { return s.empty(); });
-    cout << "lambda 方式: " << cnt2 << endl;
-
-    return 0;
-}
+// ✅ C++11: 也可以用 lambda（更现代、更推荐）
+auto cnt2 = count_if(words.begin(), words.end(),
+                     [](const string &s) { return s.empty(); });
 ```
 
 ---

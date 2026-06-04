@@ -25,14 +25,15 @@ code .
 
 ### 3. 运行代码
 
-在 VS Code 中打开任意 `.md` 文件，右键 → **Markdown Preview Enhanced: Open Preview**，然后：
+教程中的代码均为**教学示例片段**，推荐以下方式学习：
 
-- 光标放在代码块内，按 **`Shift + Enter`** → 运行当前代码块
-- 按 **`Ctrl + Shift + Enter`** → 运行文件中所有代码块
-
-代码块的输出会直接显示在预览窗口中。
-
-> 首次使用需要在 VS Code 设置中启用：`"markdown-preview-enhanced.enableScriptExecution": true`（本项目 `.vscode/settings.json` 已配置）。
+- **VS Code**：安装 C/C++ 扩展，创建 `.cpp` 文件编写代码，按 `F5` 调试运行
+- **命令行编译**：
+  ```bash
+  g++ -std=c++17 -Wall -o program file.cpp
+  ./program
+  ```
+- **复制代码块**：将教程中的代码片段复制到本地 `.cpp` 文件中运行
 
 ## 学习路径
 
@@ -76,7 +77,7 @@ code .
 ├── 作业/             # 编程练习
 │   ├── hw1/ ~ hw4/   # 计分作业
 │   └── train1/ ~ train3/  # 练习
-├── .vscode/          # VS Code 配置（MPE 代码执行已启用）
+├── .vscode/          # VS Code 配置
 ├── CLAUDE.md         # AI 辅助说明
 └── README.md         # 本文件
 ```
@@ -85,9 +86,6 @@ code .
 
 **Q: 代码块运行报错 `'iostream' file not found`？**
 A: 未安装 C++ 编译器。macOS 运行 `xcode-select --install`，Windows 安装 MinGW，Linux 安装 `g++`。
-
-**Q: 按 Shift+Enter 没反应？**
-A: 检查 VS Code 设置中 `markdown-preview-enhanced.enableScriptExecution` 是否为 `true`。
 
 **Q: 我的代码和笔记里的不一样，哪个是对的？**
 A: 笔记中的代码均已通过 `g++ -std=c++17 -Wall` 编译验证（共 156 个代码块）。如果你的代码编译不通过，可以对照检查。
