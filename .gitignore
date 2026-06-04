@@ -1,0 +1,16 @@
+# MPE 代码块运行产生的临时文件
+*.txt
+!requirements.txt
+
+# 编译产物
+*.out
+*.exe
+*.o
+*.obj
+a.out
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
