@@ -30,6 +30,8 @@
 
 RTTI 的两个核心运算符：`dynamic_cast`（安全的向下转型）和 `typeid`（获取类型信息）。
 
+> **什么时候使用 `dynamic_cast`？** 当虚函数不足以表达你的类型分派逻辑时。这里的例子：`Animal` 有虚函数 `sound()`，但 `Dog::fetch()` 和 `Cat::climb()` 不是虚函数——它们是各自子类独有的接口。通过基类指针调用这些方法前，你必须先确认对象的真实类型。`dynamic_cast` 就是干这个的。
+
 ```cpp
 class Animal {
 public:
@@ -65,6 +67,10 @@ for (auto *animal : zoo) {
 for (auto *p : zoo) delete p;
 ```
 
+> **`dynamic_cast` 的工作原理：** 它在运行时检查 `animal` 的实际类型（通过虚函数表信息），判断是否可以安全转型。如果可以，返回有效的派生类指针；如果不行，返回 `nullptr`。这听起来很强大，但需要付出运行时开销——`dynamic_cast` 比普通的 `static_cast` 慢（需要遍历继承体系）。
+>
+> **为什么不总是用 `dynamic_cast`？** 设计良好的面向对象程序应该优先考虑用**虚函数**来处理类型相关的行为差异。如果发现代码中大量使用 `dynamic_cast`，通常意味着继承体系的设计需要重构——可以把子类特有操作抽象为新的虚函数。
+
 ### 1.2 `dynamic_cast` 用于引用
 
 ```cpp
@@ -97,6 +103,8 @@ try {
 
 ### 1.3 `typeid` — 获取运行时类型信息
 
+> **`typeid` 返回一个 `type_info` 对象，它包含了类型运行时的完整信息。** 关键区别：`typeid(pb)` 返回的是指针本身的类型（`Base*`，编译期决定），而 `typeid(*pb)` 返回的是指针所指对象的实际类型（在运行时通过虚表决定）。这对多态类型的判断至关重要。
+
 ```cpp
 class Base {
 public:
@@ -122,6 +130,11 @@ int i = 42;
 // typeid(i).name()
 ```
 
+> **`typeid` 和 `dynamic_cast` 的选择：**
+> - 如果你只需要"检查对象是不是某种类型"，用 `typeid` 更简洁
+> - 如果你需要"把这对象当作某种类型来操作"，用 `dynamic_cast`（它会同时检查和转型）
+> - 如果你在写调试日志，用 `typeid(*p).name()`——但注意 `name()` 返回的实现定义的名字（不同编译器可能不同，例如 GCC 返回 `4Derived` 这样的 mangled name）
+
 > **RTTI 使用原则：**
 > - 优先用虚函数代替 RTTI（多态本身就是最好的类型分发机制）
 > - `dynamic_cast` 用于需要访问派生类特有接口的场景
@@ -130,6 +143,8 @@ int i = 42;
 ---
 
 ## 二、强类型枚举 `enum class`（C++11）
+
+> **为什么 C++11 要引入 `enum class`？** C++98 的 `enum` 有两大问题：**（1）名字污染**——`enum Color { Red, Green, Blue }` 中的 `Red` 直接进入外层作用域，你不能在同一个作用域中再定义另一个 `Red`；**（2）类型不安全**——`enum` 可以隐式转为 `int`，你可以在不需要枚举的地方意外使用它，编译器不会报错。C++11 的 `enum class` 同时解决了这两个问题。
 
 ```cpp
 // ❌ C 风格枚举（C++98）：作用域污染
@@ -164,6 +179,18 @@ int n = static_cast<int>(c);  // ✅ 必须显式转换
 // 位掩码用法
 Permission p = Permission::Read | Permission::Write;
 ```
+
+> **`enum class` 三个核心优点详解：**
+> 1. **作用域限定：** `Color::Red` 和 `TrafficLight::Red` 互不冲突——你必须显式写出枚举名作为前缀
+> 2. **无隐式转换：** `if (c == 0)` 会编译错误——你必须写 `c == Color::Red` 或在必要时用 `static_cast<int>(c)` 显式转换
+> 3. **指定底层类型：** `enum class Permission : unsigned char` 指定用 1 字节存储（默认是 `int`），在内存和序列化场景中非常重要。C++98 的枚举无法指定底层类型
+
+| | C 风格 `enum` | C++11 `enum class` |
+|---|---|---|
+| 作用域 | 全局污染 | 枚举名限定 `Enum::Value` |
+| 隐式转 int | ✅（不安全） | ❌ 必须 `static_cast` |
+| 指定底层类型 | ❌ | ✅ `enum class X : uint8_t` |
+| 前置声明 | ❌ | ✅ `enum class X;` |
 
 | | C 风格 `enum` | C++11 `enum class` |
 |---|---|---|
@@ -209,6 +236,19 @@ t1 < t2;
 | 通用性 | 高（泛型代码友好） | 低（每个 struct 是独立的类型） |
 | 何时用 | 临时聚合、模板元编程 | 领域建模、长期维护的代码 |
 
+> **`tuple` 的典型应用场景——函数返回多个值：**
+> ```cpp
+> // 不用 tuple（需要额外定义 struct）
+> struct DivisionResult { int quotient; int remainder; };
+> DivisionResult divide(int a, int b) { return {a / b, a % b}; }
+>
+> // 用 tuple（省去定义 struct 的步骤）
+> tuple<int, int> divide2(int a, int b) { return {a / b, a % b}; }
+> auto [q, r] = divide2(10, 3);  // C++17 structured binding
+> ```
+>
+> C++17 的 structured binding（结构化绑定）让 `tuple` 的使用体验大幅提升——`auto [q, r] = ...` 直接把元组元素赋给命名变量。
+>
 > **经验法则：** 如果数据的含义在上下文中显而易见（如函数返回多值），用 `tuple`；如果数据需要长期维护和理解，用 `struct`。
 
 ---
@@ -245,6 +285,8 @@ permissions.set(WRITE);
 
 ## 五、`union` — 节省空间的联合体
 
+> **`union` 的核心思想：** 所有成员共享同一块内存——同一时刻只有一个成员是"活跃的"。`union` 的大小等于其最大成员的大小。这种设计在内存受限的场景（嵌入式系统、协议解析）中非常有用，但同时也带来了手动管理的负担——你必须自己记录当前哪个成员是活跃的。
+
 ```cpp
 // C++11: union 可以包含有构造/析构函数的类型
 union Token {
@@ -263,6 +305,15 @@ t.ival = 42;
 // ⚠️ t.ival 现在无效——union 所有成员共享同一块内存
 t.dval = 3.14;
 ```
+
+> **使用 `union` 的三个关键注意事项：**
+> 1. **读取非活跃成员是未定义行为**——如果你写入了 `t.ival = 42` 然后读取 `t.dval`，结果是不可预测的（虽然很多编译器不会报错）
+> 2. **C++11 允许非平凡类型的成员**（如 `string`），但需要你手动调用其构造和析构函数——这在实践中非常容易出错
+> 3. **现代 C++ 倾向用 `std::variant`（C++17）替代 `union`**——`variant` 自动追踪当前活跃成员，类型安全
+>
+> 除非你在写底层系统代码或需要极致的内存节省，否则请优先考虑 `std::variant` 或继承体系而不是 `union`。
+
+## 六、`mem_fn` — 将成员函数转为可调用对象
 
 ---
 
